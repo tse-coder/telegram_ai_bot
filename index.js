@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { Telegraf } from "telegraf";
 import express from "express";
 import sanitize from "sanitize-html";
-import MarkdownIt from "markdown-it/index.js";
+import MarkdownIt from "markdown-it";
 import dotenv from "dotenv";
 dotenv.config();
 
