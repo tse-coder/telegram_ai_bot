@@ -15,7 +15,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 let prompt;
 const conversation = [
-  { role: "user", content: "make your answers html parsable" },
+  { userID: 1, role: "user", content: "make your answers html parsable" },
 ];
 
 // Function to format AI response for HTML and MarkdownV2
@@ -49,22 +49,25 @@ function formatAIResponse(text) {
 
 bot.start((ctx) =>
   ctx.reply(
-    "Welcome! this bot is made by a developer named: <b>Tsegaye Shewamare</b>. Send me a message and I'll respond with AI-generated text.",
+    `Welcome <i><strong>${ctx.from.first_name}</strong></i>! this bot is made by a developer named: <a href="https://tsegaye-portfolio.vercel.app"><b>Tsegaye Shewamare</b></a>. Send me a message and I'll respond with AI-generated text.`,
     { parse_mode: "HTML" }
   )
 );
 
 bot.on("text", async (ctx) => {
   prompt = ctx.message.text;
-  conversation.push({ role: "user", content: prompt });
+  conversation.push({userID: ctx.from.id, role: "user", content: prompt });
   try {
     const response = await openai.chat.completions.create({
       model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      messages: conversation,
+      messages: conversation.map((msg) => (msg.userID === ctx.from.id || msg.userID === 1) && {
+        role: msg.role,
+        content: msg.content,
+      }),
     });
 
     const aiResponse = response.choices[0].message.content ?? "";
-    conversation.push({ role: "assistant", content: aiResponse });
+    conversation.push({ userID: ctx.from.id, role: "assistant", content: aiResponse });
     const formatted = formatAIResponse(aiResponse);
     // Try sending HTML first, fallback to MarkdownV2 if error
     try {
